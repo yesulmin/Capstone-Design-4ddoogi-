@@ -1,0 +1,99 @@
+<?php
+$idx =$_POST["idx"];
+$dtx =$_POST["dtx"]; 
+
+/* CAT:Misc */
+
+
+ /* Include all the classes */
+ include("../class/pDraw.class.php");
+ include("../class/pImage.class.php");
+ include("../class/pData.class.php");
+
+try {
+        $m = new Mongo("mongodb://capdi:4ddoogi@localhost:27017");
+
+        $db = $m->yuna2;
+
+        $collection = $db->result;
+		
+	 $db2 = $m->max_margin;
+
+        $collection2= $db2->max;
+
+	$collection3=$db2->min;
+
+        
+        
+}//몽고디비 연결
+
+catch (MongoException $e){
+        echo "error message: ".$e->getMessage()."\n";
+        echo "error code: ".$e->getCode()."\n";
+}//디비가 연결안되었을 경우 에러메세지 출력
+
+//$cursor2 = $collection2->find(array("date"=>$dtx,"time"=>$idx));
+//$cursor3 = $collection3->find(array("date"=>$dtx,"time"=>$idx));
+
+//$cnt = 0;
+//$cnt2 = 0;
+//$cnt3 = 0 ;//cnt값 초기화
+
+for($i1=0;$i1<=100;$i1++){
+        $move = date("H:i:s", strtotime($idx)+$i1-50);
+        $cursor = $collection->findOne(array("date"=>$dtx,"time"=>$move));
+        $soundArray[$i1]=$cursor["temperature"];
+}
+for($i2=0;$i2<=100;$i2++){
+        $move2 = date("H:i:s", strtotime($idx)+$i2-50);
+        $cursor2 = $collection2->findOne(array("date"=>$dtx,"time"=>$move));
+        $soundArray2[$i2]=$cursor2["temperature"];
+}
+
+for($i3=0;$i3<=100;$i3++){
+        $move3 = date("H:i:s", strtotime($idx)+$i3-50);
+        $cursor3 = $collection3->findOne(array("date"=>$dtx,"time"=>$move));
+        $soundArray3[$i3]=$cursor3["temperature"];
+}
+
+//foreach ($cursor3 as $value3) {
+//        if($cnt3<100){
+//                $soundArray3[$cnt3] = $value3["sound"];//sound값 추가
+//                if( $soundArray3[$cnt3]>100){
+//                        $soundArray3[$cnt3]=100;
+//                }
+//               $cnt3++;
+//
+//        }
+//}
+
+ /* Create your dataset object */
+ $myData = new pData();
+
+ /* Add data in your dataset */
+ $myData->addPoints($soundArray, "Probe1");
+$myData->addPoints($soundArray2, "Probe2");
+$myData->addPoints($soundArray3, "Probe3");
+
+ /* Create a pChart object and associate your dataset */
+ $myPicture = new pImage(1500,500,$myData);
+
+$myPicture->drawGradientArea(0,0,1500,500,DIRECTION_VERTICAL,array("StartR"=>47,"StartG"=>47,"StartB"=>47, "EndR"=>17,"EndG"=>17,"EndB"=>17,"Alpha"=>100));
+/* Choose a nice font */
+ $myPicture->setFontProperties(array("FontName"=>"../../pChart/fonts/Forgotte.ttf","FontSize"=>10,"R"=>255,"G"=>255,"B"=>255));
+
+ /* Define the boundaries of the graph area */
+ $myPicture->setGraphArea(50,40,1450,460);
+
+
+/* Draw the scale, keep everything automatic */
+
+$myPicture->drawScale(array("DrawSubTicks"=>TRUE,"GridR"=>255, "GridG"=>255,"GridB"=>255,"AxisR"=>255,"AxisG"=>255,"AxisB"=>255,"Mode"=>SCALE_MODE_MANUAL, "ManualScale"=>array (0 => array ( "Min"=>-100, "Max"=> 100), 1 => array ( "Min"=> 0, "Max"=> 100))));//"CycleBackground"=>TRUE
+
+ /* Draw the scale, keep everything automatic */
+ $myPicture->drawSplineChart();
+
+ /* Render the picture (choose the best way) */
+ $myPicture->autoOutput("pictures/example.basic.png");
+?>
+
