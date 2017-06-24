@@ -1,0 +1,42 @@
+import serial
+import time
+import sys
+import pymongo
+import datetime
+import arrow
+
+connection = pymongo.MongoClient("mongodb://210.94.210.250")
+print("connection")
+
+db = connection.yuna2
+users = db.result
+
+ser = serial.Serial("/dev/ttyACM0",9600)
+ser.flushInput()
+
+print("sensor")
+
+while True:
+        vals = ser.readline()
+        now = datetime.datetime.now()
+        D = arrow.now().format('YYYY-MM-DD')
+        T = arrow.now().format('HH:mm:ss')
+
+        a = float(vals)
+        b = int(float(vals))
+        div =a/b
+        print(div)
+
+
+        if div == 1.0:
+                print("sound:", vals)
+                doc = {'date':D,'time':T,'sound':vals}
+        else:   
+                print("temperature:", vals)
+                doc = {'date':D,'time':T,'temperature':vals}
+        try:
+                users.insert(doc)
+        except:
+                print("insert failed")
+
+        time.sleep(1)
