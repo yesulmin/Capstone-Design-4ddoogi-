@@ -1,0 +1,35 @@
+<?php
+               try {
+                $m = new Mongo("mongodb://capdi:4ddoogi@localhost:27017");
+
+                $db = $m->yuna2;
+
+                $collection = $db->result;
+
+                }
+
+                catch (MongoException $e){
+                        echo "error message: ".$e->getMessage()."\n";
+                        echo "error code: ".$e->getCode()."\n";
+                }
+
+
+                $nowTime = date("H:i:s",time()-1);
+                $T = (int)$nowTime;
+                $nowDate = date("Y-m-d");
+                $findArray = array(
+                        'time' => $nowTime,
+                        'date' => $nowDate,
+                );
+                $cursor = $collection->findOne($findArray);
+
+                $soundValue = $cursor['sound'];
+                $soundVal = (int)$soundValue;
+                $tempValue = $cursor['temperature'];
+		$tempVal = (float)$tempValue;
+		$randomValue = $cursor['value'];
+		$randomVal = (int)$randomValue;
+
+	echo json_encode(array("sound" => $soundVal,"temperature" => $tempVal,"value" => $randomVal));
+?>
+
