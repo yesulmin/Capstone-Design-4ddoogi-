@@ -1,0 +1,498 @@
+<?php
+	include("max.php");
+        include("min.php");
+?>
+
+<!DOCTYPE HTML>
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<title>4DDOOGI PROJECT</title>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+
+
+		<!-- smoothie -->
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+		<script type="text/javascript" src="http://210.94.210.250:8888/smoothie-master/smoothie.js"></script>
+		<script type="text/javascript">
+
+        var val=0;
+	var val2=0;
+
+
+        function getValSound(){
+
+                $.getJSON('http://210.94.210.250:8888/smoothie-master/examples/getSensor.php',function(data){
+                        val=data.sound;
+                });
+                return val;
+        }
+	function getValTemp(){
+		$.getJSON('http://210.94.210.250:8888/smoothie-master/examples/getSensor.php',function(data){
+                        val2=data.temperature;
+                });
+                return val2;
+        }
+
+
+        var soundVal=0;
+	var temperatureVal = 0;
+        var random = new TimeSeries();
+	var randomTemp = new TimeSeries();
+        var randomNum = new TimeSeries();
+	var randomNum1 = new TimeSeries();
+	var randomNum2 = new TimeSeries();
+	var randomNum3 = new TimeSeries();
+
+	var maxLine = new TimeSeries();
+        var minLine = new TimeSeries();
+	var soundCutMax = new TimeSeries();
+	var soundCutMin = new TimeSeries();
+	var tempCutMax = new TimeSeries();
+	var tempCutMin = new TimeSeries();
+	var numCutMax = new TimeSeries();
+	var numCutMin = new TimeSeries();
+
+	var i=0,j=0, cnt=0, err_cnt_sound=0, err_cnt_temp=0, nonerr_cnt=0;
+        var soundArray = new Array();
+        var tempArray = new Array();
+
+	var soundArraySum=0, soundArrayAvg=0, tempArraySum=0, tempArrayAvg=0;
+
+        setInterval(function() {
+
+                soundVal = getValSound();
+		temperatureVal = getValTemp();
+                var now = new Date().getTime();
+		var randomValue = Math.floor(Math.random()*10);
+		var randomValue1 = Math.floor((Math.random()*10)+60);
+		var randomValue2 = Math.floor(Math.random()*15);
+		var randomValue3 = Math.floor(Math.random()*15);
+
+		setSoundMax=soundArrayAvg+20;
+		setTempMax=tempArrayAvg+5;		
+		var $setSoundMax = $('#setSoundMax');
+		var $setTempMax = $('#setTempMax');		
+		$.post('max.php', { num1: setSoundMax , num2: setTempMax});
+
+		setSoundMin=soundArrayAvg-20;
+                setTempMin=tempArrayAvg-5;
+                var $setSoundMin = $('#setSoundMin');
+                var $setTempMin = $('#setTempMin');
+                $.post('min.php', { num1: setSoundMin , num2: setTempMin});
+
+		
+                maxLine.append(now, 50);
+                minLine.append(now, 0);
+		soundCutMax.append(now, soundArrayAvg+20);
+		soundCutMin.append(now, soundArrayAvg-20);
+		tempCutMax.append(now, tempArrayAvg+3);
+		tempCutMin.append(now, tempArrayAvg-3);
+                random.append(now, soundVal);
+		randomTemp.append(now, temperatureVal); 
+		randomNum.append(now, randomValue);
+		randomNum1.append(now, randomValue1);
+		randomNum2.append(now, randomValue2);
+		randomNum3.append(now, randomValue3);
+
+		document.rtcForm1.rtcInput.value = soundVal;	
+		document.rtcForm2.rtcInput.value = temperatureVal;
+		document.rtcForm3.rtcInput.value = randomValue;
+		document.rtcForm4.rtcInput.value = randomValue1;
+                document.rtcForm5.rtcInput.value = randomValue2;
+                document.rtcForm6.rtcInput.value = randomValue3;
+		document.rtcForm7.rtcInput.value = soundArrayAvg+20;
+		document.rtcForm8.rtcInput.value = soundArrayAvg-20;
+		document.rtcForm9.rtcInput.value = tempArrayAvg+3;
+		document.rtcForm10.rtcInput.value = tempArrayAvg-3;
+
+		soundArray[i] = soundVal;
+       		tempArray[i] = temperatureVal;
+                i++;
+                cnt++;
+
+		nonerr_cnt=5;
+
+		if(cnt==10){
+
+			if(soundArray[0]>soundArrayAvg+20&&tempArray[0]>tempArrayAvg+3){
+				err_cnt_sound++;
+				err_cnt_temp++;
+				nonerr_cnt--;
+			}
+			else if(soundArray[0]>soundArrayAvg+20){
+				err_cnt_sound++;
+				if(err_cnt_sound>4){
+					err_cnt_sound--;
+				}
+				err_cnt_temp--;
+				if(err_cnt_temp<0){
+					err_cnt_temp=0;
+				}
+				nonerr_cnt--;
+                	}
+			else if(tempArray[0]>tempArrayAvg+3){
+				err_cnt_temp++;
+				if(err_cnt_temp>4){
+					err_cnt_temp--;
+				}
+				err_cnt_sound--;
+				if(err_cnt_sound<0){
+					err_cnt_sound=0;
+				}
+				nonerr_cnt--;
+			}
+			else if(err_cnt_sound>0||err_cnt_temp>0){
+				nonerr_cnt++;
+				if(nonerr_cnt>8){
+					err_cnt_sound--;
+					err_cnt_temp--;
+					if(err_cnt_sound<0){
+						err_cnt_sound=0;
+					}
+					if(err_cnt_temp<0){
+						err_cnt_temp=0;
+					}
+				}
+				if(err_cnt_sound==0&&err_cnt_temp==0){
+					nonerr_cnt=5;
+				}
+			}		
+                	
+			if(err_cnt_sound>3&&err_cnt_temp>3){
+                        	notificationing("Fatal Error:All sensor get Error");
+                        }
+			else if(err_cnt_sound>3){
+				notificationing("Sound Error:Sound sensor get Error");
+			}
+			else if(err_cnt_temp>3){
+				notificationing("Temp Error:Temperature sensor get Error");
+			}
+			if(err_cnt_sound>3||err_cnt_temp>3){
+				window.open("http://210.94.210.250/smoothie-master/4ddoogi/test11.html");
+				err_cnt_sound=0;
+				err_cnt_temp=0;
+				nonerr_cnt=5;
+			}
+
+                        soundArraySum=0, soundArrayAvg=0, tempArraySum=0, tempArrayAvg=0;
+                        for(j=0;j<=9;j++){
+                        soundArraySum = soundArraySum + soundArray[j];
+                        tempArraySum = tempArraySum + tempArray[j];
+                        }
+                        soundArrayAvg = soundArraySum/10.0;
+                        tempArrayAvg = tempArraySum/10.0;
+                        for(j=0; j<=9; j++){
+                        soundArray[j+1] = soundArray[j];
+                        tempArray[j+1] = tempArray[j];
+                        }
+                        i=0;
+                        cnt=9;
+                }
+		
+
+        }, 1000);
+
+
+		function setMessage(msg){
+        arr=1;
+        filter=msg.split('|');
+        arr*=filter[1];
+        document.getElementById("title").innerHTML=filter[0];   //input name
+   
+		}
+
+        function createTimeline() {
+        var chart = new SmoothieChart({ grid: { strokeStyle: 'rgb(100, 100, 100)', fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 250, verticalSections:20 }, labels:{fillStyle:'#ffffff',precision:1}, timestampFormatter:SmoothieChart.timeFormatter });
+                chart.addTimeSeries(random, { strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0)', lineWidth: 3});
+                chart.addTimeSeries(maxLine, {strokeStyle: 'rgba(0, 0, 0, 0)', fillStyle: 'rgba(0, 0, 0, 0)', lineWidth: 3});
+                chart.addTimeSeries(minLine, {strokeStyle: 'rgba(0, 0, 0, 0)', fillStyle: 'rgba(0, 0, 0, 0)', lineWidth: 3});
+                chart.addTimeSeries(soundCutMax, {strokeStyle: 'rgba(255, 255, 0, 1)', fillStyle: 'rgba(255, 255, 0, 0)', lineWidth: 3});
+		chart.addTimeSeries(soundCutMin, {strokeStyle: 'rgba(255, 255, 0, 1)', fillStyle: 'rgba(255, 255, 0, 0)', lineWidth: 3});
+		chart.streamTo(document.getElementById("chart"), 500);
+
+		var chart2 = new SmoothieChart({ grid: { strokeStyle: 'rgb(100, 100, 100)', fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 250, verticalSections:20 }, labels:{fillStyle:'#ffffff',precision:1}, timestampFormatter:SmoothieChart.timeFormatter });
+		chart2.addTimeSeries(randomTemp, { strokeStyle: 'rgba(0, 0, 255, 1)', fillStyle: 'rgba(0, 0, 255, 0)', lineWidth: 3});
+                chart2.addTimeSeries(maxLine, {strokeStyle: 'rgba(0, 0, 0, 0)', fillStyle: 'rgba(0, 0, 0, 0)', lineWidth: 3});
+                chart2.addTimeSeries(minLine, {strokeStyle: 'rgba(0, 0, 0, 0)', fillStyle: 'rgba(0, 0, 0, 0)', lineWidth: 3});
+		chart2.addTimeSeries(tempCutMax, {strokeStyle: 'rgba(255, 255, 0, 1)', fillStyle: 'rgba(255, 255, 0, 0)', lineWidth: 3});
+                chart2.addTimeSeries(tempCutMin, {strokeStyle: 'rgba(255, 255, 0, 1)', fillStyle: 'rgba(255, 255, 0, 0)', lineWidth: 3});
+                chart2.streamTo(document.getElementById("chart2"), 500);
+
+		var chart3 = new SmoothieChart({ grid: { strokeStyle: 'rgb(100, 100, 100)', fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 250, verticalSections:20 }, labels:{fillStyle:'#ffffff',precision:1}, timestampFormatter:SmoothieChart.timeFormatter });
+                chart3.addTimeSeries(randomNum, { strokeStyle: 'rgba(0, 255, 255, 1)', fillStyle: 'rgba(0, 255, 255, 0)', lineWidth: 3});
+                chart3.addTimeSeries(maxLine, {strokeStyle: 'rgba(0, 0, 0, 0)', fillStyle: 'rgba(0, 0, 0, 0)', lineWidth: 3});
+                chart3.addTimeSeries(minLine, {strokeStyle: 'rgba(0, 0, 0, 0)', fillStyle: 'rgba(0, 0, 0, 0)', lineWidth: 3});
+                chart3.streamTo(document.getElementById("chart3"), 500);
+
+		var chart4 = new SmoothieChart({ grid: { strokeStyle: 'rgb(100, 100, 100)', fillStyle: 'rgb(0, 0, 0)', lineWidth: 1, millisPerLine: 250, verticalSections:20 }, labels:{fillStyle:'#ffffff',precision:1}, timestampFormatter:SmoothieChart.timeFormatter });
+                chart4.addTimeSeries(randomNum1, { strokeStyle: 'rgba(0, 150, 0, 1)', fillStyle: 'rgba(0, 255, 255, 0)', lineWidth: 3});
+		chart4.addTimeSeries(randomNum2, { strokeStyle: 'rgba(0, 150, 150, 1)', fillStyle: 'rgba(0, 255, 255, 0)', lineWidth: 3});
+		chart4.addTimeSeries(randomNum3, { strokeStyle: 'rgba(150, 150, 0, 1)', fillStyle: 'rgba(0, 255, 255, 0)', lineWidth: 3});
+
+                chart4.addTimeSeries(maxLine, {strokeStyle: 'rgba(0, 0, 0, 0)', fillStyle: 'rgba(0, 0, 0, 0)', lineWidth: 3});
+                chart4.addTimeSeries(minLine, {strokeStyle: 'rgba(0, 0, 0, 0)', fillStyle: 'rgba(0, 0, 0, 0)', lineWidth: 3});
+                chart4.streamTo(document.getElementById("chart4"), 500);
+
+
+        }
+		</script>
+	</head>
+	<body onload="createTimeline()">
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+		<!-- Header -->
+		<header id="header">
+			<a href="4ddoogi.html" class="logo"><strong>Fault Diagnosis Program</strong> by 4ddoogi</a>
+									
+		</header>
+
+		<!-- Banner -->
+		<section id="banner">
+		<div class="content">
+	<header>
+		<h1>Real Time Graph<br />	</h1>
+		<p>showing data extracted from sensors</p>
+	
+	</header>
+	
+	<p>Our dashboard showing data extracted from sensors immediately. You can check the Fault Diagnosis Program(FDP) screen by click the buttons below.</p>
+	
+	<ul class="actions">
+	<li><a href="faultdiagnosissound.html" class="button big">Sound</a></li>
+	<li><a href="faultdiagnosistemperature.html" class="button big">Temperature</a></li>
+	</ul>
+	</div>
+
+	</section>
+
+	<section>
+	<div class="graph" style="height:100%; width:100%; overflow: hidden;">
+	<div id="left" style="float: left; width:70%;">
+	<canvas id="chart" width="1000" height="300"></canvas>
+	</div>
+
+	<div id="right" style="float: left; width:30%;">
+	<article>
+		<span class="icon fa-sound"></span>
+		<div class="sound graph">
+			<h3> Sound </h3>
+			<div class = "1">
+				<div id="left" style="float: left; width:50%;">
+				<p> Maximum Critical value : </p>
+				</div>
+				<div id="right" style="float: left; width:50%;">
+				<form name="rtcForm7">
+				<input type="text" name="rtcInput" size="20" readonly="readonly" />
+				</form>
+				</div>
+			</div>
+			<div class = "2">
+				<div id="left" style="float: left; width:50%;">
+				<p> Sound value : </p>
+				</div>
+				<div id="right" style="float: left; width:50%;">
+				<form name="rtcForm1">
+                        	<input type="text" name="rtcInput" size="20" readonly="readonly" />
+                        	</form>
+				</div>
+			</div>
+			<div class = "3">
+				<div id="left" style="float: left; width:50%;">
+				<p> Minimum Critical value : </p>
+				</div>
+				<div id="right" style="float: left; width:50%;">
+				<form name="rtcForm8">
+                        	<input type="text" name="rtcInput" size="20" readonly="readonly" />
+                        	</form>
+				</div>
+			</div>
+			<div class = "4">
+				<p> ** green line shows real time sound value.</p>
+				<p> ** yellow lines are the critical lines. </p>
+			</div>
+		</div>
+	</article>
+	</div>
+	</div>
+		<hr>
+	<div class="graph" style="height:100%; width:100%; overflow: hidden;">
+        <div id="left" style="float: left; width:70%;">
+	<canvas id="chart2" width="1000" height="300"></canvas>
+	</div>
+	<div id="right" style="float: left; width:30%;">
+	<article>
+		<span class="icon fa-temperature"></span>
+			<div class="content">
+			<h3> temperature </h3>
+			<div id="left" style="float: left; width:50%;">
+                        <p> Maximum Critical value : </p>
+                        </div>
+                        <div id="right" style="float: left; width:50%;">
+			<form name="rtcForm9">
+                        <input type="text" name="rtcInput" size="20" readonly="readonly" />
+                        </form> 
+			</div>
+			<div id="left" style="float: left; width:50%;">
+                        <p> Temperature value : </p>
+                        </div>
+                        <div id="right" style="float: left; width:50%;">
+			<form name="rtcForm2">
+                        <input type="text" name="rtcInput" size="20" readonly="readonly" />
+                        </form>
+			</div>
+			<div id="left" style="float: left; width:50%;">
+                        <p> Manimum Critical value : </p>
+                        </div>
+                        <div id="right" style="float: left; width:50%;">
+			<form name="rtcForm10">
+                        <input type="text" name="rtcInput" size="20" readonly="readonly" />
+                        </form>
+			</div>
+			<p> **blue line shows real time temperature value.</p>
+			<p> **yellow lines are the critical lines. </p>
+		</div>
+	</article>
+	</div>
+	</div>
+		<hr>
+	<div class="graph" style="height:100%; width:100%; overflow: hidden;">
+        <div id="left" style="float: left; width:70%;">
+	<canvas id="chart3" width="1000" height="300"></canvas>
+	</div>
+        <div id="right" style="float: left; width:30%;">
+	<article>
+			<div class="content">
+			<h3> Sensor </h3>
+			<div id="left" style="float: left; width:50%;">
+                        <p> random value : </p>
+                        </div>
+                        <div id="right" style="float: left; width:50%;">
+			<form name="rtcForm3">
+                        <input type="text" name="rtcInput" size="20" readonly="readonly" />
+                        </form>
+			</div>
+			<p> **cyan line shows real time sensor value.</p>
+			<p> **yellow lines are the critical lines. </p>
+		</div>
+	</article>
+	</div>  
+        </div>
+		<hr>
+        <div class="graph" style="height:100%; width:100%; overflow: hidden;">
+        <div id="left" style="float: left; width:70%;">
+        <canvas id="chart4" width="1000" height="300"></canvas>
+        </div>
+        <div id="right" style="float: left; width:30%;">
+        <article>
+                        <div class="content">
+                        <h3> Vibration </h3>
+			<div id="left" style="float: left; width:50%;">
+                        <p> Z-axis value : </p>
+                        </div>
+                        <div id="right" style="float: left; width:50%;">
+                        <form name="rtcForm4">
+                        <input type="text" name="rtcInput" size="20" readonly="readonly" />
+			</form>
+			</div>
+			<div id="left" style="float: left; width:50%;">
+                        <p> X-axis value : </p>
+                        </div>
+                        <div id="right" style="float: left; width:50%;">
+                        <form name="rtcForm5">
+                        <input type="text" name="rtcInput" size="20" readonly="readonly" />
+                        </form>
+			</div>
+			<div id="left" style="float: left; width:50%;">
+                        <p> Y-axis value : </p>
+                        </div>
+                        <div id="right" style="float: left; width:50%;">
+			<form name="rtcForm6">
+                        <input type="text" name="rtcInput" size="20" readonly="readonly" />
+                        </form>
+			</div>
+                        <p> **green line shows real time x-axis value.</p>
+			<p> **cyan line shows real time y-axis value.</p>
+			<p> **yellow line shows real time z-axis value.</p>
+                </div>
+        </article>
+        </div>  
+        </div>
+	</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+										<li><a href="4ddoogi.html">Real Time Graph</a></li>
+										<li><a href="faultdiagnosissound.html">Fault Diagnosis Program_Sound</a></li>
+										<li><a href="faultdiagnosistemperature.html">Fault Diagnosis Program_Temperature</a></li>
+										<li><a href="elements.html">Elements</a></li>
+										
+									</ul>
+								</nav>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>If you have any questions about our project, please contact us using the information below.</p>
+									<ul class="contact">
+										<li class="fa-envelope-o"><a href="#">kenny9503@naver.com</a></li>
+										<li class="fa-phone">(+82) 010-9102-9880</li>
+										<li class="fa-home">Dongguk University, Wonheunggwan E265, C.A.P.S  <br />
+										(04620) 30, Pildong-ro 1-gil,Jung-gu, Seoul, Republic of Korea</li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; 4DDOOGI. All rights reserved. 
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+			<script src="assets/js/notification2.js"></script>
+		
+
+	</body>
+</html>
+
