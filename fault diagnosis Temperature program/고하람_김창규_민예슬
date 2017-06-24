@@ -1,0 +1,134 @@
+<php
+        include ("graphTemperature.php");
+?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<!--
+	Editorial by HTML5 UP
+	html5up.net | @ajlkn
+	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
+-->
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=EUC-KR">
+	<title>Insert title here</title>
+
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+		<!--[if lte IE 8]><script src="assets/js/ie/html5shiv.js"></script><![endif]-->
+		<link rel="stylesheet" href="assets/css/main.css" />
+		<!--[if lte IE 9]><link rel="stylesheet" href="assets/css/ie9.css" /><![endif]-->
+		<!--[if lte IE 8]><link rel="stylesheet" href="assets/css/ie8.css" /><![endif]-->
+
+	<script type="text/javascript">
+
+	function fnGo() {
+  	
+  		frm.target = "ifrm";
+  		//frm.action = "/test.do?name=elin";
+  		frm.action="graphTemperature.php";
+  		frm.submit();
+  	}
+
+	</script>
+
+	</head>
+	
+	
+	<body>
+
+		<!-- Wrapper -->
+			<div id="wrapper">
+
+				<!-- Main -->
+					<div id="main">
+						<div class="inner">
+
+							<!-- Header -->
+								<header id="header">
+									<a href="4ddoogi.html" class="logo"><strong>Fault Diagnosis Program </strong> by 4ddoogi</a>
+									
+								</header>
+
+							<!-- Content -->
+								<section>
+									<header class="main">
+										<h1>Fault Diagnosis Program_Temperature</h1>
+									</header>
+
+	<form name="frm" id="frm" method="post">
+	<table border="1" height="200" width="500">
+	<tr>
+		<td align="center">Date </td>
+                <td align="center"><input name="dtx" type="date" value="2017-06-22"></td>
+                <td align="center">Time</td>
+                <td align="center"><input type="text" name="idx" value="11:57:00"></td>
+                <td align="center"><input type="button" value="check" onclick="fnGo();"></td>
+	</tr>
+	<tr>
+		<td colspan="5">	
+		<iframe name="ifrm" id="ifrm" width="1500" height="500" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+		</td>
+	</tr>
+	</table>
+	</form>		
+
+
+								</section>
+
+						</div>
+					</div>
+
+				<!-- Sidebar -->
+					<div id="sidebar">
+						<div class="inner">
+
+							
+
+							<!-- Menu -->
+								<nav id="menu">
+									<header class="major">
+										<h2>Menu</h2>
+									</header>
+									<ul>
+<li><a href="4ddoogi.html">DashBoard</a></li>
+<li><a href="faultdiagnosissound.html">Fault Diagnosis Program_Sound</a></li>
+<li><a href="faultdiagnosistemperature.html">Fault Diagnosis Program_Temperature</a></li>
+<li><a href="elements.html">Elements</a></li>
+										
+									</ul>
+								</nav>
+
+							<!-- Section -->
+								<section>
+									<header class="major">
+										<h2>Get in touch</h2>
+									</header>
+									<p>If you have any questions about our project, please contact us using the information below.</p>
+									<ul class="contact">
+										<li class="fa-envelope-o"><a href="#">kenny9503@naver.com</a></li>
+										<li class="fa-phone">(+82) 010-9102-9880</li>
+										<li class="fa-home">Dongguk University, Wonheunggwan E265, C.A.P.S  <br />
+										(04620) 30, Pildong-ro 1-gil,Jung-gu, Seoul, Republic of Korea</li>
+									</ul>
+								</section>
+
+							<!-- Footer -->
+								<footer id="footer">
+									<p class="copyright">&copy; 4DDOOGI. All rights reserved. 
+								</footer>
+
+						</div>
+					</div>
+
+			</div>
+
+		<!-- Scripts -->
+			<script src="assets/js/jquery.min.js"></script>
+			<script src="assets/js/skel.min.js"></script>
+			<script src="assets/js/util.js"></script>
+			<!--[if lte IE 8]><script src="assets/js/ie/respond.min.js"></script><![endif]-->
+			<script src="assets/js/main.js"></script>
+
+	</body>
+</html>
